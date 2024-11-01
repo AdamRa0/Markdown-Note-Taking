@@ -1,14 +1,23 @@
 from ast import literal_eval
+from pathlib import Path
 
 from flask import Blueprint, request, json, jsonify
 
 
 notes_routes = Blueprint("notes", __name__, url_prefix="/api/v1/notes")
+NOTES_DIR = Path(f"{Path.cwd()}/uploaded_notes")
+
 
 
 @notes_routes.route("/")
 def view_notes():
-    return "View all notes route", 200
+    files = [str(f) for f in NOTES_DIR.iterdir() if f.is_file()]
+
+    res = f"data: {files}"
+
+    response = json.dumps(res)
+
+    return jsonify(response), 200
 
 
 @notes_routes.route("/create", methods=["POST"])
@@ -18,7 +27,7 @@ def create_note():
     title = data.get("title")
     body = data.get("body")
 
-    with open(f"{title}.md", "w+") as writer:
+    with open(f"{NOTES_DIR}/{title}.md", "w+") as writer:
         writer.write(body)
 
     return jsonify("Note created successfully"), 201
