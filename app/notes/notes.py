@@ -1,11 +1,12 @@
-from ast import literal_eval
 from pathlib import Path
 
 import markdown
 from flask import Blueprint, request, json, jsonify, render_template
+from spellchecker import SpellChecker
 
 
 notes_routes = Blueprint("notes", __name__, url_prefix="/api/v1/notes")
+
 NOTES_DIR = Path(f"{Path.cwd()}/uploaded_notes")
 TEMPLATES_DIR = Path(f"{Path.cwd()}/app/templates")
 
@@ -46,7 +47,16 @@ def get_note(note: str):
 
 @notes_routes.route("/check-grammer/<note>")
 def check_grammer_in_note(note: str):
-    return "Chcek grammer note route", 200
+    checker = SpellChecker()
+
+    with open(f"{NOTES_DIR}/{note}.md", "r") as reader:
+        content = reader.read()
+
+    mispelled_words = checker.unknown(content)
+
+    response = f"Misplaced Words coupled with suggestions: {[(word, checker.candidates(word)) for word in mispelled_words if word != ' ' and word != '\n']}"
+
+    return jsonify(response), 200
 
 
 @notes_routes.route("/upload", methods=["POST"])
