@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import markdown
@@ -64,6 +65,11 @@ def upload_note():
     pass
 
 
-@notes_routes.route("/delete", methods=["DELETE"])
-def delete_note():
-    pass
+@notes_routes.route("/delete/<note>", methods=["DELETE"])
+def delete_note(note: str):
+    try:
+        os.remove(f"{NOTES_DIR}/{note}.md")
+        os.remove(f"{TEMPLATES_DIR}/{note}.html")
+        return jsonify("Note deleted"), 204
+    except FileNotFoundError:
+        return jsonify("Note not found"), 404
