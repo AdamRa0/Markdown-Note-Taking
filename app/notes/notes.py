@@ -1,17 +1,19 @@
 from ast import literal_eval
 from pathlib import Path
 
-from flask import Blueprint, request, json, jsonify
+import markdown
+from flask import Blueprint, request, json, jsonify, render_template
 
 
 notes_routes = Blueprint("notes", __name__, url_prefix="/api/v1/notes")
 NOTES_DIR = Path(f"{Path.cwd()}/uploaded_notes")
+TEMPLATES_DIR = Path(f"{Path.cwd()}/app/templates")
 
 
 
 @notes_routes.route("/")
 def view_notes():
-    files = [str(f) for f in NOTES_DIR.iterdir() if f.is_file()]
+    files = [f.name for f in NOTES_DIR.iterdir() if f.is_file()]
 
     res = f"data: {files}"
 
@@ -30,12 +32,16 @@ def create_note():
     with open(f"{NOTES_DIR}/{title}.md", "w+") as writer:
         writer.write(body)
 
+    with open(f"{TEMPLATES_DIR}/{title}.html", "w+") as writer:
+        html = markdown.markdown(body)
+        writer.write(html)
+
     return jsonify("Note created successfully"), 201
 
 
 @notes_routes.route("/<note>")
 def get_note(note: str):
-    return "Get note route", 200
+    return render_template(f"{note}.html")
 
 
 @notes_routes.route("/check-grammer/<note>")
