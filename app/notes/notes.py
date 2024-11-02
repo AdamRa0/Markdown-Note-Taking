@@ -17,11 +17,7 @@ TEMPLATES_DIR = Path(f"{Path.cwd()}/app/templates")
 def view_notes():
     files = [f.name for f in NOTES_DIR.iterdir() if f.is_file()]
 
-    res = f"data: {files}"
-
-    response = json.dumps(res)
-
-    return jsonify(response), 200
+    return jsonify({"data": files}), 200
 
 
 @notes_routes.route("/create", methods=["POST"])
@@ -38,7 +34,7 @@ def create_note():
         html = markdown.markdown(body)
         writer.write(html)
 
-    return jsonify("Note created successfully"), 201
+    return jsonify({"message": "Note created successfully"}), 201
 
 
 @notes_routes.route("/<note>")
@@ -57,18 +53,18 @@ def check_grammer_in_note(note: str):
 
     response = f"Misplaced Words coupled with suggestions: {[(word, checker.candidates(word)) for word in mispelled_words if word != ' ' and word != '\n']}"
 
-    return jsonify(response), 200
+    return jsonify({"message": response}), 200
 
 
 @notes_routes.route("/upload", methods=["POST"])
 def upload_note():
     if 'file' not in request.files:
-        return jsonify("File not uploaded"), 400
+        return jsonify({"message": "File not uploaded"}), 400
 
     file = request.files['file']
 
     if file.filename == "":
-        return jsonify("No selected file"), 400
+        return jsonify({"message": "No selected file"}), 400
 
     filename = file.filename
 
@@ -82,7 +78,7 @@ def upload_note():
         html = markdown.markdown(file_content)
         writer.write(html)
 
-    return jsonify("Note uploaded"), 200
+    return jsonify({"message": "Note uploaded"}), 200
 
 
 @notes_routes.route("/delete/<note>", methods=["DELETE"])
@@ -90,6 +86,6 @@ def delete_note(note: str):
     try:
         os.remove(f"{NOTES_DIR}/{note}.md")
         os.remove(f"{TEMPLATES_DIR}/{note}.html")
-        return jsonify("Note deleted"), 204
+        return jsonify({"message": "Note deleted"}), 204
     except FileNotFoundError:
-        return jsonify("Note not found"), 404
+        return jsonify({"message": "Note not found"}), 404
