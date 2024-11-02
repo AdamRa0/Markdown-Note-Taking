@@ -62,7 +62,27 @@ def check_grammer_in_note(note: str):
 
 @notes_routes.route("/upload", methods=["POST"])
 def upload_note():
-    pass
+    if 'file' not in request.files:
+        return jsonify("File not uploaded"), 400
+
+    file = request.files['file']
+
+    if file.filename == "":
+        return jsonify("No selected file"), 400
+
+    filename = file.filename
+
+    filename_without_extension = os.path.splitext(filename)[0]
+
+    file_content = file.read().decode("utf-8")
+
+    file.save(f"{NOTES_DIR}/{filename}")
+
+    with open(f"{TEMPLATES_DIR}/{filename_without_extension}.html", "w+") as writer:
+        html = markdown.markdown(file_content)
+        writer.write(html)
+
+    return jsonify("Note uploaded"), 200
 
 
 @notes_routes.route("/delete/<note>", methods=["DELETE"])
