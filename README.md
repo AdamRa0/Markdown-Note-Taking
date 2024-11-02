@@ -4,4 +4,4 @@ API that allows users to create notes by passing down markdown text or uploading
 Users can also delete notes.
 
 ## Documentation
-API Documentation can be found ![here](https://app.swaggerhub.com/apis-docs/RAOADAM87/Markdown-Note-Taking/1.0.0)
+API Documentation can be found [here](https://app.swaggerhub.com/apis-docs/RAOADAM87/Markdown-Note-Taking/1.0.0)
